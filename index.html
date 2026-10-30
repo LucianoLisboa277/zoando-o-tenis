@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zoando o Tênis!</title>
+<style>
+  :root {
+    --ground: #12201A;
+    --btn: #1E3329;
+    --text: #EAF2E4;
+    --muted: #A9BFAE;
+    --ball: #D7F23B;
+    --c-inicio: #F2C14E;
+    --c-erros: #FF8A65;
+    --c-reacoes: #7EE0A1;
+    --c-todas: #EAF2E4;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100dvh;
+    padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header { display: flex; align-items: center; gap: 16px; flex: 0 0 auto; }
+  h1 { margin: 0; flex: 0 0 auto; font-size: 26px; line-height: 1.1; font-weight: 800; color: var(--ball); }
+  #status { flex: 1 1 0; min-width: 0; font-size: 14px; line-height: 1.25; color: var(--muted); min-height: 18px; }
+  nav { display: flex; gap: 8px; overflow-x: auto; flex: 0 0 auto; padding-bottom: 4px; }
+  button { font: inherit; cursor: pointer; color: var(--text); }
+  button:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+  .tab {
+    min-height: 44px; padding: 0 16px; border-radius: 22px; font-size: 15px; font-weight: 700;
+    white-space: nowrap; flex: 0 0 auto;
+    border: 2px solid var(--c); background: var(--btn);
+  }
+  .tab[aria-pressed="true"] { background: var(--c); color: var(--ground); }
+  main {
+    flex: 1 1 0; min-height: 0; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;
+    align-content: start;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .phrase {
+    min-height: 68px; border-radius: 14px; padding: 10px 12px;
+    font-size: 16px; font-weight: 700; line-height: 1.2; text-align: left;
+    display: flex; align-items: center;
+    border: 2px solid var(--c); background: var(--btn);
+  }
+  .phrase.on { background: var(--c); color: var(--ground); }
+  .phrase.missing { opacity: 0.45; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zoando o Tênis!</h1>
+  <div id="status" role="status" aria-live="polite"></div>
+</header>
+<nav id="tabs" aria-label="Categorias"></nav>
+<main id="list"></main>
+
+<script>
+(function () {
+  var GROUPS = [
+    { id: 'inicio', name: 'Início e fim', color: 'var(--c-inicio)', phrases: [
+      ['Melhor começar logo', 'Melhor-começar-logo.mp3'],
+      ['Terceiraaaaa!', 'Terceiraaaaa!.mp3'],
+      ['Bora que tem próxima, cambada!', 'Bora-que-tem-próxima,-cambada!.mp3'],
+      ['É fim de partida', 'E-é-fim-de-partida.mp3'],
+      ['Este vai pro tiebreak', 'este-vai-par-ao-tiebrake.mp3']
+    ] },
+    { id: 'erros', name: 'Erros', color: 'var(--c-erros)', phrases: [
+      ['Bate essa bola, miseráver', 'Bate-essa-bola,-miseráver.mp3'],
+      ['Quanto é que tá essa bagaça', 'Quanto-é-que-tá-essa-bagaça.mp3'],
+      ['Que maderada, meu amigo!', 'Que-maderada-meu-amigo!.mp3'],
+      ['Queee patatada!', 'Queee-patatada!.mp3'],
+      ['Cês tão de brincadeira, né', 'Cês-tão-de-brincadeira,-né.mp3'],
+      ['Cacilda, ninguém tá conseguindo', 'cacilda-ninguem-ta-conseg-silvio-luiz.mp3'],
+      ['Faltou encordoar a raquete', 'Faltou-encordoar-a-raquete.mp3'],
+      ['Coloca cordas nessa raquete', 'Coloca-cordas-nessa-raquete,-meu-irmão!.mp3'],
+      ['Melhor vender essa raquete', 'Melhor-vender-essa-raquete,-amigão!.mp3'],
+      ['Volta pra casa e leva a raquete', 'Volta-pra-casa-e-leva-a-raquete,-meu-amigo!.mp3'],
+      ['Pagou a raquete inteira', 'Bom,-pagou-a-raquete-inteira.-Pode-usar-a-madeir.mp3']
+    ] },
+    { id: 'reacoes', name: 'Reações', color: 'var(--c-reacoes)', phrases: [
+      ['Olha o break point aí, gente', 'Olha-o-break-point-aíìì-gente.mp3'],
+      ['Subiu, subiu, subiu', 'subiu-subiu-subiu-silvio-luiz.mp3'],
+      ['Calma, filhão. Calma.', 'Calma,-filhão.-Calma.mp3'],
+      ['Pode tentar de novo, bonitão', 'pode-tentar-de-novo-bonit-silvio-luiz.mp3'],
+      ['Tá com medo ou tá com frio?', 'Tá-com-medo,-ou-tá-com-frio.-Meu-camarada.mp3'],
+      ['É um bando de baloeiro!', 'É-um-bando-de-baloêro,-mesmo!.mp3'],
+      ['Tem uns caras bom aqui', 'Tem-uns-caras-bom-aqui.mp3'],
+      ['Pelo amor dos meus filhinhos', 'pelo-amor-dos-meus-filhinhos.mp3'],
+      ['Pelas barbas do profeta', 'pelas-barbas-do-profeta-silvio-luiz.mp3'],
+      ['Que que eu vou dizer', 'que-que-eu-vou-dizer.mp3'],
+      ['Minha nossa senhora', 'minha-nossa-sinhooora-silvio-luiz.mp3'],
+      ['Que saudades do Galvão!', 'Que-saudades-do-Galvão!.mp3'],
+      ['Vini, Rosildo, Lucas, Rafa e Alex', 'O-VIni,-o-Rosildo,-O-Lucas,-O-Rafa-e-o-ALex.-Vão.mp3'],
+      ['Cara joga bem', 'cara-joga-bem.mp3']
+    ] }
+  ];
+
+  var tabs = [{ id: 'todas', name: 'Todas', color: 'var(--c-todas)' }].concat(GROUPS);
+  var current = 'todas';
+  var playing = null;
+  var audios = {};
+  var statusEl = document.getElementById('status');
+  var tabsEl = document.getElementById('tabs');
+  var listEl = document.getElementById('list');
+
+  function audioFor(file) {
+    if (!audios[file]) {
+      var a = new Audio(encodeURIComponent(file));
+      a.preload = 'auto';
+      a.addEventListener('ended', function () { if (playing === file) { playing = null; render(); } });
+      a.addEventListener('error', function () {
+        if (playing === file) {
+          playing = null;
+          render();
+          statusEl.textContent = 'Arquivo não encontrado: ' + file;
+        }
+      });
+      audios[file] = a;
+    }
+    return audios[file];
+  }
+
+  function titleOf(file) {
+    for (var g = 0; g < GROUPS.length; g++) {
+      for (var p = 0; p < GROUPS[g].phrases.length; p++) {
+        if (GROUPS[g].phrases[p][1] === file) return GROUPS[g].phrases[p][0];
+      }
+    }
+    return file;
+  }
+
+  function play(file) {
+    Object.keys(audios).forEach(function (k) { audios[k].pause(); audios[k].currentTime = 0; });
+    var a = audioFor(file);
+    playing = file;
+    render();
+    var r = a.play();
+    if (r && r.catch) r.catch(function () { playing = null; render(); });
+  }
+
+  function render() {
+    tabsEl.textContent = '';
+    tabs.forEach(function (t) {
+      var b = document.createElement('button');
+      b.className = 'tab';
+      b.type = 'button';
+      b.textContent = t.name;
+      b.style.setProperty('--c', t.color);
+      b.setAttribute('aria-pressed', current === t.id ? 'true' : 'false');
+      b.addEventListener('click', function () { current = t.id; render(); });
+      tabsEl.appendChild(b);
+    });
+
+    listEl.textContent = '';
+    GROUPS.forEach(function (g) {
+      if (current !== 'todas' && current !== g.id) return;
+      g.phrases.forEach(function (p) {
+        var b = document.createElement('button');
+        b.className = 'phrase' + (playing === p[1] ? ' on' : '');
+        b.type = 'button';
+        b.textContent = p[0];
+        b.style.setProperty('--c', g.color);
+        b.addEventListener('click', function () { play(p[1]); });
+        listEl.appendChild(b);
+      });
+    });
+
+    statusEl.textContent = playing ? 'Tocando: ' + titleOf(playing) : '';
+  }
+
+  render();
+  GROUPS.forEach(function (g) { g.phrases.forEach(function (p) { audioFor(p[1]); }); });
+})();
+</script>
+</body>
+</html>
