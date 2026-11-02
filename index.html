@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12201A">
 <title>Zoando o Tênis!</title>
 <style>
   :root {
     --ground: #12201A;
     --btn: #1E3329;
     --text: #EAF2E4;
-    --muted: #A9BFAE;
     --ball: #D7F23B;
     --c-inicio: #F2C14E;
     --c-erros: #FF8A65;
@@ -17,54 +17,69 @@
     --c-todas: #EAF2E4;
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
+  html { background: var(--ground); }
   body {
+    margin: 0;
+    min-height: 100dvh;
     background: var(--ground);
     color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: 100dvh;
-    padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
-    overflow: hidden;
     -webkit-tap-highlight-color: transparent;
+    padding: 0 max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   }
-  header { display: flex; align-items: center; gap: 16px; flex: 0 0 auto; }
-  h1 { margin: 0; flex: 0 0 auto; font-size: 26px; line-height: 1.1; font-weight: 800; color: var(--ball); }
-  #status { flex: 1 1 0; min-width: 0; font-size: 14px; line-height: 1.25; color: var(--muted); min-height: 18px; }
-  nav { display: flex; gap: 8px; overflow-x: auto; flex: 0 0 auto; padding-bottom: 4px; }
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--ground);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    padding: max(8px, env(safe-area-inset-top)) 0 8px;
+  }
+  h1 { margin: 0; flex: 1 1 auto; font-size: 20px; line-height: 1.1; font-weight: 800; color: var(--ball); }
   button { font: inherit; cursor: pointer; color: var(--text); }
   button:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
+  #fs {
+    flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 20px;
+    border: 2px solid #5E7D69; background: var(--btn); font-size: 14px; font-weight: 700;
+  }
+  nav { flex: 1 1 100%; display: flex; gap: 6px; }
   .tab {
-    min-height: 44px; padding: 0 16px; border-radius: 22px; font-size: 15px; font-weight: 700;
-    white-space: nowrap; flex: 0 0 auto;
+    flex: 1 1 auto; min-height: 44px; padding: 0 8px; border-radius: 22px;
+    font-size: 14px; font-weight: 700; white-space: nowrap;
     border: 2px solid var(--c); background: var(--btn);
   }
   .tab[aria-pressed="true"] { background: var(--c); color: var(--ground); }
-  main {
-    flex: 1 1 0; min-height: 0; overflow-y: auto;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;
-    align-content: start;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-  }
+  main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .phrase {
-    min-height: 68px; border-radius: 14px; padding: 10px 12px;
+    min-height: 56px; border-radius: 14px; padding: 8px 12px;
     font-size: 16px; font-weight: 700; line-height: 1.2; text-align: left;
     display: flex; align-items: center;
     border: 2px solid var(--c); background: var(--btn);
   }
   .phrase.on { background: var(--c); color: var(--ground); }
-  .phrase.missing { opacity: 0.45; }
+  #msg {
+    position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: 90vw; padding: 10px 16px; border-radius: 12px;
+    background: #FFFFFF; color: #12201A; font-size: 14px; font-weight: 700;
+    display: none; z-index: 10;
+  }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (min-width: 700px) {
+    h1 { flex: 0 0 auto; font-size: 22px; }
+    nav { order: 2; flex: 1 1 0; }
+    .tab { flex: 0 0 auto; padding: 0 16px; font-size: 15px; }
+    #fs { order: 3; }
+    main { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Zoando o Tênis!</h1>
-  <div id="status" role="status" aria-live="polite"></div>
+  <button id="fs" type="button" hidden>Tela cheia</button>
+  <nav id="tabs" aria-label="Categorias"></nav>
 </header>
-<nav id="tabs" aria-label="Categorias"></nav>
 <main id="list"></main>
+<div id="status" class="sr" role="status" aria-live="polite"></div>
+<div id="msg" role="alert"></div>
 
 <script>
 (function () {
@@ -103,7 +118,8 @@
       ['Minha nossa senhora', 'minha-nossa-sinhooora-silvio-luiz.mp3'],
       ['Que saudades do Galvão!', 'Que-saudades-do-Galvão!.mp3'],
       ['Vini, Rosildo, Lucas, Rafa e Alex', 'O-VIni,-o-Rosildo,-O-Lucas,-O-Rafa-e-o-ALex.-Vão.mp3'],
-      ['Cara joga bem', 'cara-joga-bem.mp3']
+      ['Cara joga bem', 'cara-joga-bem.mp3'],
+      ['Aqui não', 'Aqui-não.mp3']
     ] }
   ];
 
@@ -112,8 +128,18 @@
   var playing = null;
   var audios = {};
   var statusEl = document.getElementById('status');
+  var msgEl = document.getElementById('msg');
   var tabsEl = document.getElementById('tabs');
   var listEl = document.getElementById('list');
+  var fsBtn = document.getElementById('fs');
+  var msgTimer = null;
+
+  function showMsg(text) {
+    msgEl.textContent = text;
+    msgEl.style.display = 'block';
+    clearTimeout(msgTimer);
+    msgTimer = setTimeout(function () { msgEl.style.display = 'none'; }, 3500);
+  }
 
   function audioFor(file) {
     if (!audios[file]) {
@@ -124,7 +150,7 @@
         if (playing === file) {
           playing = null;
           render();
-          statusEl.textContent = 'Arquivo não encontrado: ' + file;
+          showMsg('Arquivo não encontrado: ' + file);
         }
       });
       audios[file] = a;
@@ -147,7 +173,7 @@
     playing = file;
     render();
     var r = a.play();
-    if (r && r.catch) r.catch(function () { playing = null; render(); });
+    if (r && r.catch) r.catch(function () { if (playing === file) { playing = null; render(); } });
   }
 
   function render() {
@@ -178,6 +204,27 @@
     });
 
     statusEl.textContent = playing ? 'Tocando: ' + titleOf(playing) : '';
+  }
+
+  var root = document.documentElement;
+  if (root.requestFullscreen) {
+    fsBtn.hidden = false;
+    fsBtn.addEventListener('click', function () {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+        return;
+      }
+      root.requestFullscreen().then(function () {
+        if (screen.orientation && screen.orientation.lock) {
+          return screen.orientation.lock('landscape');
+        }
+      }).catch(function () {});
+    });
+    document.addEventListener('fullscreenchange', function () {
+      var on = !!document.fullscreenElement;
+      fsBtn.textContent = on ? 'Sair da tela cheia' : 'Tela cheia';
+      if (!on && screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+    });
   }
 
   render();
