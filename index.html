@@ -14,6 +14,7 @@
     --c-inicio: #F2C14E;
     --c-erros: #FF8A65;
     --c-reacoes: #7EE0A1;
+    --c-errei: #B39DFF;
     --c-todas: #EAF2E4;
   }
   * { box-sizing: border-box; }
@@ -34,13 +35,21 @@
     padding: max(8px, env(safe-area-inset-top)) 0 8px;
   }
   h1 { margin: 0; flex: 1 1 auto; font-size: 20px; line-height: 1.1; font-weight: 800; color: var(--ball); }
+  [hidden] { display: none !important; }
   button { font: inherit; cursor: pointer; color: var(--text); }
   button:focus-visible { outline: 3px solid #FFFFFF; outline-offset: 2px; }
   #fs {
     flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 20px;
     border: 2px solid #5E7D69; background: var(--btn); font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
   }
-  nav { flex: 1 1 100%; display: flex; gap: 6px; }
+  #fx {
+    flex: 1 1 100%; min-height: 48px; padding: 0 14px; border-radius: 24px;
+    border: 2px solid var(--ball); background: var(--btn); color: var(--ball);
+    font-size: 15px; font-weight: 800; letter-spacing: 0.04em;
+  }
+  #fx.on { background: var(--ball); color: var(--ground); }
+  nav { flex: 1 1 100%; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
   .tab {
     flex: 1 1 auto; min-height: 44px; padding: 0 8px; border-radius: 22px;
     font-size: 14px; font-weight: 700; white-space: nowrap;
@@ -63,10 +72,12 @@
   }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   @media (min-width: 700px) {
-    h1 { flex: 0 0 auto; font-size: 22px; }
+    h1 { flex: 0 0 auto; font-size: 20px; }
     nav { order: 2; flex: 1 1 0; }
-    .tab { flex: 0 0 auto; padding: 0 16px; font-size: 15px; }
-    #fs { order: 3; }
+    .tab { flex: 0 0 auto; padding: 0 12px; font-size: 14px; }
+    #fx { order: 3; flex: 0 0 auto; min-height: 44px; border-radius: 22px; font-size: 14px; }
+    #fs { order: 4; padding: 0 10px; }
+    #fs .lbl { display: none; }
     main { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 </style>
@@ -74,7 +85,11 @@
 <body>
 <header>
   <h1>Zoando o Tênis!</h1>
-  <button id="fs" type="button" hidden>Tela cheia</button>
+  <button id="fs" type="button" aria-label="Tela cheia" hidden>
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    <span class="lbl">Tela cheia</span>
+  </button>
+  <button id="fx" type="button">EFEITOS SONOROS</button>
   <nav id="tabs" aria-label="Categorias"></nav>
 </header>
 <main id="list"></main>
@@ -102,7 +117,21 @@
       ['Coloca cordas nessa raquete', 'Coloca-cordas-nessa-raquete,-meu-irmão!.mp3'],
       ['Melhor vender essa raquete', 'Melhor-vender-essa-raquete,-amigão!.mp3'],
       ['Volta pra casa e leva a raquete', 'Volta-pra-casa-e-leva-a-raquete,-meu-amigo!.mp3'],
-      ['Pagou a raquete inteira', 'Bom,-pagou-a-raquete-inteira.-Pode-usar-a-madeir.mp3']
+      ['Pagou a raquete inteira', 'Bom,-pagou-a-raquete-inteira.-Pode-usar-a-madeir.mp3'],
+      ['Aaaut!', 'Aaaut_.mp3'],
+      ['Saiu', 'Saiu.mp3'],
+      ['Levanta essa bola!', 'Levanta-essa-bola_.mp3']
+    ] },
+    { id: 'errei', name: 'Errei porque...', color: 'var(--c-errei)', phrases: [
+      ['Errei porque tava calor', 'criança-2026-11-11-13-33-Errei-porque-tava-calor_.mp3'],
+      ['Errei porque tava frio', 'criança-2026-11-11-13-33-Errei-porque-tava-frio_.mp3'],
+      ['Errei porque tinha sol', 'criança-2026-11-11-13-34-Errei-porque-tinha-sol_.mp3'],
+      ['Errei porque tinha vento', 'criança-2026-11-11-13-35-Errei-porque-tinha-vento_.mp3'],
+      ['Errei porque não vi a bolinha', 'criança-2026-11-11-13-34-Errei-porque-não-vi-a-bolinha_.mp3'],
+      ['Errei porque joguei ontem', 'criança-2026-11-11-13-36-Errei-porque-joguei-ontem_.mp3'],
+      ['Errei porque não joguei ontem', 'criança-2026-11-11-13-36-Errei-porque-não-joguei-ontem_.mp3'],
+      ['Errei porque nem queria jogar', 'criança-2026-11-11-13-36-Errei-porque-nem-queria-jogar_.mp3'],
+      ['Errei porque jogo mal', 'criança-2026-11-11-13-35-Errei-porque-jogo-mal_.mp3']
     ] },
     { id: 'reacoes', name: 'Reações', color: 'var(--c-reacoes)', phrases: [
       ['Olha o break point aí, gente', 'Olha-o-break-point-aíìì-gente.mp3'],
@@ -119,8 +148,44 @@
       ['Que saudades do Galvão!', 'Que-saudades-do-Galvão!.mp3'],
       ['Vini, Rosildo, Lucas, Rafa e Alex', 'O-VIni,-o-Rosildo,-O-Lucas,-O-Rafa-e-o-ALex.-Vão.mp3'],
       ['Cara joga bem', 'cara-joga-bem.mp3'],
-      ['Aqui não', 'Aqui-não.mp3']
+      ['Aqui não', 'Aqui-não.mp3'],
+      ['Que jogada sensacional!', 'Que-jogada-sensacional_.mp3'],
+      ['Torcida, favor não se manifestar', 'Torcida_-favor-não-se-manifestar.mp3']
     ] }
+  ];
+
+  var EFFECTS = [
+    'floraphonic-silly-trumpet-10-187809.mp3',
+    '3dabrar-funny-alarm-317531.mp3',
+    'aberrantrealities-funny-lighthearted-springy-boing-effect-18-416271.mp3',
+    'aberrantrealities-funny-lighthearted-springy-boing-effect-20-416269.mp3',
+    'alex_jauk-funny-fart-216687.mp3',
+    'applehillstudios-wacky-silly-cartoon-laugh-1-543562.mp3',
+    'arjuntalan79089-laugh-high-pitch-154516.mp3',
+    'bubuchickz-sarcastic-villain-laugh_02-109108.mp3',
+    'cartoon_music-audience-laughing-516070.mp3',
+    'digitalstore07-evil-laughing-430367.mp3',
+    'digitalstore07-funny-laughing-430381.mp3',
+    'digitalstore07-laughing-430382.mp3',
+    'dragon-studio-cartoon-hyena-laugh-487674.mp3',
+    'dragon-studio-wet-fart-335478.mp3',
+    'ejah_music-epic-fail-413769.mp3',
+    'floraphonic-brass-fail-8-a-207130.mp3',
+    'floraphonic-laughing-adult-woman-4-204979.mp3',
+    'kalsstockmedia-funny-boing-spring-sound-comedy-301692.mp3',
+    'mrstokes302-goofy-laugh-sfx-verb-mrstokes302-525043.mp3',
+    'openmindaudio-kids-end-screen-music-bright-sticker-goodbye-500926.mp3',
+    'safeyable-efek-suara-funny-putri-lucu-180275.mp3',
+    'shrek_30-nonverbal-omgaaa-323263.mp3',
+    'shrek_30-pop-wow-323262.mp3',
+    'u_3s1ndb7rdw-human-blowing-a-raspberry-tuning-440hz-433605.mp3',
+    'universfield-failure-trumpet-242645.mp3',
+    'universfield-funny-fail-02-277575.mp3',
+    'universfield-funny-male-laugh-117725.mp3',
+    'universfield-funny-rimshot-250961.mp3',
+    'universfield-sad-trumpet-278822.mp3',
+    'universfield-wah-wah-horn-117724.mp3',
+    'universfield-whistle-slide-down-02-350715.mp3'
   ];
 
   var tabs = [{ id: 'todas', name: 'Todas', color: 'var(--c-todas)' }].concat(GROUPS);
@@ -132,6 +197,9 @@
   var tabsEl = document.getElementById('tabs');
   var listEl = document.getElementById('list');
   var fsBtn = document.getElementById('fs');
+  var fsLbl = fsBtn.querySelector('.lbl');
+  var fxBtn = document.getElementById('fx');
+  var lastFx = null;
   var msgTimer = null;
 
   function showMsg(text) {
@@ -164,7 +232,13 @@
         if (GROUPS[g].phrases[p][1] === file) return GROUPS[g].phrases[p][0];
       }
     }
-    return file;
+    return EFFECTS.indexOf(file) !== -1 ? 'efeito sonoro' : file;
+  }
+
+  function playRandomEffect() {
+    var pool = EFFECTS.filter(function (f) { return f !== lastFx; });
+    lastFx = pool[Math.floor(Math.random() * pool.length)];
+    play(lastFx);
   }
 
   function play(file) {
@@ -203,6 +277,7 @@
       });
     });
 
+    fxBtn.classList.toggle('on', EFFECTS.indexOf(playing) !== -1);
     statusEl.textContent = playing ? 'Tocando: ' + titleOf(playing) : '';
   }
 
@@ -222,12 +297,16 @@
     });
     document.addEventListener('fullscreenchange', function () {
       var on = !!document.fullscreenElement;
-      fsBtn.textContent = on ? 'Sair da tela cheia' : 'Tela cheia';
+      fsLbl.textContent = on ? 'Sair da tela cheia' : 'Tela cheia';
+      fsBtn.setAttribute('aria-label', fsLbl.textContent);
       if (!on && screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
     });
   }
 
+  fxBtn.addEventListener('click', playRandomEffect);
+
   render();
+  EFFECTS.forEach(audioFor);
   GROUPS.forEach(function (g) { g.phrases.forEach(function (p) { audioFor(p[1]); }); });
 })();
 </script>
